@@ -1,0 +1,13 @@
+https://github.com/qauni/json-server.git
+
+git clone https://github.com/qauni/json-server.git
+
+cd \jason-server\
+
+npm install
+
+npm install -g json-server
+
+C:\Todojmeter\JsonServer\json-server
+
+npm run start

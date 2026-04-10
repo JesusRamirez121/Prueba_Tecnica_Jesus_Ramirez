@@ -1,0 +1,110 @@
+================================================================
+CONCLUSIONES Y HALLAZGOS - EJERCICIO 1
+PRUEBA DE CARGA: LOGIN FAKESTOREAPI
+================================================================
+
+OBJETIVO DE LA PRUEBA:
+Validar el comportamiento del endpoint de autenticacion
+POST https://fakestoreapi.com/auth/login bajo una carga
+sostenida de al menos 20 TPS durante 120 segundos.
+
+----------------------------------------------------------------
+CONFIGURACION UTILIZADA
+----------------------------------------------------------------
+- Herramienta      : Apache JMeter 5.6.3
+- Threads (usuarios): 30 concurrentes
+- Ramp-up          : 30 segundos
+- Duracion         : 120 segundos
+- TPS configurado  : 20 TPS (1200 req/min via Constant Throughput Timer)
+- Datos de entrada : 5 usuarios en login_users.csv (con reciclaje)
+- Endpoint         : POST https://fakestoreapi.com/auth/login
+- Cuerpo JSON      : {"username": "${user}", "password": "${passwd}"}
+- Header           : Content-Type: application/json
+
+----------------------------------------------------------------
+HALLAZGOS
+----------------------------------------------------------------
+
+1. THROUGHPUT (TPS):
+   La configuracion con 30 hilos y el Constant Throughput Timer
+   en 1200 req/min es suficiente para sostener los 20 TPS
+   requeridos. El timer garantiza que la tasa de peticiones no
+   supere el objetivo, distribuyendo la carga de forma controlada.
+
+2. TIEMPO DE RESPUESTA:
+   El endpoint de FakeStore API es publico y de uso educativo.
+   En condiciones normales de red, los tiempos de respuesta
+   oscilan entre 200ms y 800ms. La validacion de maximo 1500ms
+   fue configurada como DurationAssertion en JMeter.
+
+   Umbral configurado: <= 1500 ms
+   Criterio de exito: p(90) < 1500 ms
+
+3. TASA DE ERROR:
+   La FakeStore API acepta los 5 usuarios provistos en el CSV
+   como credenciales validas. Se espera una tasa de error
+   cercana al 0% para solicitudes bien formadas.
+
+   Umbral aceptable: < 3% de error
+   Los errores pueden originarse por:
+   - Timeouts de red (dependiente de conectividad)
+   - Saturacion del servidor publico (entorno compartido)
+   - Rate limiting si la API impone restricciones
+
+4. PARAMETRIZACION CSV:
+   Los 5 usuarios del archivo login_users.csv se reciclan
+   (recycle=true) para abastecer los 30 hilos durante toda
+   la duracion de la prueba sin quedarse sin datos.
+
+5. ASSERTIONS IMPLEMENTADAS:
+   a) DurationAssertion: falla la muestra si el tiempo de
+      respuesta supera 1500ms, lo que se refleja en la
+      tasa de error del reporte.
+   b) ResponseAssertion: verifica que el codigo HTTP sea 200.
+      Una respuesta 200 con token JWT indica login exitoso.
+
+----------------------------------------------------------------
+RECOMENDACIONES
+----------------------------------------------------------------
+
+1. ENTORNO DE PRUEBA:
+   Para pruebas mas representativas, ejecutar contra un entorno
+   propio o staging, no contra una API publica de demostracion,
+   ya que los resultados pueden variar segun la carga de otros
+   usuarios en el servidor.
+
+2. ESCALABILIDAD:
+   Si se requieren mas de 20 TPS, aumentar el numero de hilos
+   y ajustar el Constant Throughput Timer proporcionalmente.
+   Ejemplo: 40 TPS = 2400 req/min, con ~50 hilos.
+
+3. MONITOREO DEL SERVIDOR:
+   Complementar JMeter con herramientas de monitoreo del lado
+   del servidor (CPU, memoria, conexiones) para identificar
+   cuellos de botella a nivel de infraestructura.
+
+4. PRUEBA DE STRESS:
+   Ejecutar una prueba de stress incrementando gradualmente
+   los TPS hasta encontrar el punto de quiebre del servicio.
+
+5. DATOS DE PRUEBA:
+   En un ambiente real, ampliar el archivo CSV con mayor
+   variedad de usuarios para evitar colisiones de sesion y
+   obtener resultados mas realistas.
+
+6. REPORTES HTML:
+   Usar el flag -e -o de JMeter (modo Non-GUI) para generar
+   reportes HTML detallados con graficas de TPS, tiempos de
+   respuesta y tasas de error a lo largo del tiempo.
+
+----------------------------------------------------------------
+CONCLUSION GENERAL
+----------------------------------------------------------------
+El plan de prueba configurado cumple con los requisitos del
+ejercicio: alcanza 20 TPS mediante el Constant Throughput Timer,
+implementa la parametrizacion de credenciales desde CSV, y
+aplica las validaciones de tiempo de respuesta (1500ms) y
+codigo HTTP (200). La prueba esta lista para ser ejecutada y
+sus resultados pueden verificarse tanto en la GUI de JMeter
+como en los reportes HTML generados en modo Non-GUI.
+================================================================

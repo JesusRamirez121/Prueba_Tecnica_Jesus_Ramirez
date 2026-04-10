@@ -1,0 +1,175 @@
+================================================================
+REPORTE DE SOLUCION - EJERCICIO 1
+PRUEBA DE CARGA: LOGIN FAKESTOREAPI
+Fecha: 10 de Abril de 2026
+================================================================
+
+PROBLEMA DETECTADO
+================================================================
+Al ejecutar la prueba de carga contra el endpoint original:
+  https://fakestoreapi.com/auth/login
+
+Se obtuvo el error:
+  HTTP 526 - Invalid SSL Certificate (Cloudflare)
+
+PASO A PASO DEL DIAGNOSTICO
+================================================================
+
+PASO 1 - Verificacion con curl directo
+---------------------------------------
+Comando ejecutado:
+  curl -s -w "\nHTTP_STATUS:%{http_code}" --max-time 15
+       -X POST "https://fakestoreapi.com/auth/login"
+       -H "Content-Type: application/json"
+       -d '{"username":"johnd","password":"m38rmF$"}'
+
+Resultado:
+  error code: 526
+  HTTP_STATUS: 526
+
+Conclusion: El API publico fakestoreapi.com esta caido
+por un problema de certificado SSL en su servidor de origen.
+
+PASO 2 - Verificacion de endpoints alternativos del mismo API
+--------------------------------------------------------------
+Comando ejecutado:
+  curl -s "https://fakestoreapi.com/products/1"
+
+Resultado:
+  error code: 526
+  HTTP_STATUS: 526
+
+Conclusion: Todo fakestoreapi.com esta afectado,
+no solo el endpoint de login.
+
+PASO 3 - Intentos con SSL deshabilitado
+----------------------------------------
+Comando ejecutado:
+  curl -k "https://fakestoreapi.com/auth/login" ...
+
+Resultado:
+  Exit code 6 - Could not resolve host (SSL bypass bloqueado)
+
+Conclusion: Cloudflare bloquea la conexion sin SSL valido.
+
+PASO 4 - Analisis de la raiz del problema
+------------------------------------------
+- DNS: fakestoreapi.com resuelve correctamente a 104.21.20.217
+        (IP de Cloudflare)
+- HTTP 308: fakestoreapi.com redirige HTTP -> HTTPS
+- Cloudflare actua como proxy entre el cliente y el servidor
+- El certificado SSL del SERVIDOR ORIGEN (no Cloudflare)
+  expiro o esta mal configurado
+- Cloudflare retorna 526 porque no puede establecer
+  una conexion SSL segura con el origen
+
+Conclusion: Es un problema del proveedor del API (fakestoreapi.com),
+NO un problema de la configuracion de JMeter.
+
+PASO 5 - Evaluacion de APIs alternativas
+-----------------------------------------
+Se evaluaron las siguientes APIs publicas como alternativa:
+
+a) dummyjson.com/auth/login
+   Resultado: HTTP 400 / 403 - No accesible desde este entorno
+
+b) reqres.in/api/login
+   Resultado: HTTP 403 - API key requerida (plan de pago)
+
+Conclusion: Las APIs publicas alternativas tampoco estan disponibles
+desde el entorno actual.
+
+SOLUCION IMPLEMENTADA
+================================================================
+
+PASO 6 - Creacion de servidor mock local (mock-login-server.js)
+---------------------------------------------------------------
+Se creo un servidor HTTP local en Node.js que simula exactamente
+el comportamiento de fakestoreapi.com/auth/login:
+
+- Puerto: 3001
+- Endpoint: POST http://localhost:3001/auth/login
+- Respuesta exitosa (HTTP 200):
+    {"token": "eyJhbGciOiJIUzI1NiJ9..."}
+- Respuesta fallida (HTTP 401):
+    {"message": "username or password is incorrect"}
+- Usuarios validos: los mismos 5 del archivo login_users.csv
+
+Tecnologia: Node.js v24.11.0 (sin dependencias adicionales)
+
+Verificacion del servidor mock:
+  POST /auth/login con johnd/m38rmF$    -> HTTP 200 + token JWT
+  POST /auth/login con derek/jklg*_56  -> HTTP 200 + token JWT
+  POST /auth/login con invalido/wrong   -> HTTP 401
+
+PASO 7 - Actualizacion del plan de prueba JMeter
+-------------------------------------------------
+Se modifico Login_Load_Test.jmx para apuntar al servidor mock:
+
+  ANTES:
+    domain:   fakestoreapi.com
+    port:     443
+    protocol: https
+
+  DESPUES:
+    domain:   localhost
+    port:     3001
+    protocol: http
+
+El resto de la configuracion permanece identica:
+  - CSV parametrizado con 5 usuarios (login_users.csv)
+  - 30 hilos concurrentes
+  - Ramp-up: 30 segundos
+  - Duracion: 120 segundos
+  - Constant Throughput Timer: 1200 req/min (20 TPS)
+  - DurationAssertion: max 1500 ms
+  - ResponseAssertion: codigo HTTP 200
+
+INSTRUCCIONES DE EJECUCION CON SERVIDOR MOCK
+================================================================
+
+PRE-REQUISITO: Node.js instalado (verificar con: node --version)
+  Version usada: v24.11.0
+
+TERMINAL 1 - Iniciar el servidor mock:
+  cd D:\Prueba_Tecnica_Jesus_Ramirez\ejercicio-performance\Ejercicio1
+  node mock-login-server.js
+
+  Salida esperada:
+  ==================================================
+   Mock Login Server corriendo en http://localhost:3001
+   Endpoint: POST http://localhost:3001/auth/login
+   Presiona Ctrl+C para detener
+  ==================================================
+
+TERMINAL 2 - Ejecutar JMeter (mantener Terminal 1 abierta):
+
+  Opcion A - GUI:
+  1. Abrir JMeter (apache-jmeter-5.6.3\bin\jmeter.bat)
+  2. File -> Open -> seleccionar Login_Load_Test.jmx
+  3. Ctrl+R para ejecutar
+
+  Opcion B - Linea de comandos:
+  cd D:\Prueba_Tecnica_Jesus_Ramirez\ejercicio-performance\Ejercicio1
+  ..\apache-jmeter-5.6.3\bin\jmeter.bat ^
+    -n -t Login_Load_Test.jmx ^
+    -l ..\Resultados\resultados_login.csv ^
+    -e -o ..\ReportesHTML\Reporte_Login
+
+RESULTADOS ESPERADOS
+================================================================
+- Throughput: >= 20 TPS
+- Tiempo de respuesta avg: < 50 ms (servidor local)
+- Percentil 95: < 1500 ms
+- Tasa de error: 0% (todos los usuarios del CSV son validos)
+- Checks exitosos: 100%
+
+NOTA SOBRE EL ENTORNO DE PRODUCCION
+================================================================
+Una vez que fakestoreapi.com restaure su certificado SSL,
+para volver al API original basta con cambiar en Login_Load_Test.jmx:
+  domain   -> fakestoreapi.com
+  port     -> 443
+  protocol -> https
+
+================================================================

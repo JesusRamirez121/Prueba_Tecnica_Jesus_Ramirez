@@ -1,0 +1,16 @@
+timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,URL,Latency,IdleTime,Connect
+1729560993269,674,Store,200,OK,Usuarios 1-2,text,true,,28041,119,5,5,http://opencart.abstracta.us/,545,0,362
+1729560993714,426,Store,200,OK,Usuarios 1-1,text,true,,28041,119,5,5,http://opencart.abstracta.us/,299,0,125
+1729560994721,423,Store,200,OK,Usuarios 1-5,text,true,,28041,119,5,5,http://opencart.abstracta.us/,298,0,126
+1729560995020,424,Store,200,OK,Usuarios 1-3,text,true,,28041,119,5,5,http://opencart.abstracta.us/,300,0,125
+1729560995123,425,Store,200,OK,Usuarios 1-4,text,true,,28041,119,5,5,http://opencart.abstracta.us/,299,0,127
+1729560996878,297,StorePhone,200,OK,Usuarios 1-3,text,true,,31104,159,5,5,http://opencart.abstracta.us/index.php?route=product/category&path=24,175,0,0
+1729560996986,302,StorePhone,200,OK,Usuarios 1-2,text,true,,31104,159,5,5,http://opencart.abstracta.us/index.php?route=product/category&path=24,178,0,0
+1729560997174,298,StorePhone,200,OK,Usuarios 1-4,text,true,,31104,159,5,5,http://opencart.abstracta.us/index.php?route=product/category&path=24,174,0,0
+1729560997753,305,StorePhone,200,OK,Usuarios 1-1,text,true,,31104,159,5,5,http://opencart.abstracta.us/index.php?route=product/category&path=24,176,0,0
+1729560998425,297,StorePhone,200,OK,Usuarios 1-5,text,true,,31104,159,5,5,http://opencart.abstracta.us/index.php?route=product/category&path=24,173,0,0
+1729560998894,302,StoreLaptos,200,OK,Usuarios 1-3,text,true,,35784,159,5,5,http://opencart.abstracta.us/index.php?route=product/category&path=18,180,0,0
+1729560999066,308,StoreLaptos,200,OK,Usuarios 1-2,text,true,,35784,159,4,4,http://opencart.abstracta.us/index.php?route=product/category&path=18,183,0,0
+1729561000170,317,StoreLaptos,200,OK,Usuarios 1-4,text,true,,35784,159,3,3,http://opencart.abstracta.us/index.php?route=product/category&path=18,193,0,0
+1729561001741,308,StoreLaptos,200,OK,Usuarios 1-1,text,true,,35784,159,2,2,http://opencart.abstracta.us/index.php?route=product/category&path=18,184,0,0
+1729561001935,305,StoreLaptos,200,OK,Usuarios 1-5,text,true,,35784,159,1,1,http://opencart.abstracta.us/index.php?route=product/category&path=18,180,0,0

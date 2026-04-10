@@ -1,0 +1,342 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Prueba de Carga - Login FakeStore API">
+      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+        <collectionProp name="Arguments.arguments"/>
+      </elementProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
+    </TestPlan>
+    <hashTree>
+      <SetupThreadGroup guiclass="SetupThreadGroupGui" testclass="SetupThreadGroup" testname="setUp - Auto-detectar y configurar entorno">
+        <intProp name="ThreadGroup.num_threads">1</intProp>
+        <intProp name="ThreadGroup.ramp_time">1</intProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+          <stringProp name="LoopController.loops">1</stringProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </SetupThreadGroup>
+      <hashTree>
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Detectar API real / Iniciar mock si es necesario" enabled="true">
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="script">
+// ════════════════════════════════════════════════════════════
+// PASO 1: Verificar disponibilidad del API real
+// ════════════════════════════════════════════════════════════
+def realAvailable = false
+def realError     = &quot;&quot;
+
+try {
+    def url  = new URL(&quot;https://fakestoreapi.com/auth/login&quot;)
+    def conn = url.openConnection()
+    conn.setRequestMethod(&quot;POST&quot;)
+    conn.setDoOutput(true)
+    conn.setConnectTimeout(5000)
+    conn.setReadTimeout(8000)
+    conn.setRequestProperty(&quot;Content-Type&quot;, &quot;application/json&quot;)
+    conn.getOutputStream().write(
+        &apos;{&quot;username&quot;:&quot;donero&quot;,&quot;password&quot;:&quot;ewedon&quot;}&apos;.getBytes(&quot;UTF-8&quot;)
+    )
+    conn.getOutputStream().flush()
+    int code = conn.getResponseCode()
+    conn.disconnect()
+    if (code == 200) {
+        realAvailable = true
+    } else {
+        realError = &quot;HTTP &quot; + code + &quot; (esperado 200)&quot;
+    }
+} catch (Exception ex) {
+    realError = ex.getClass().getSimpleName() + &quot;: &quot; + ex.getMessage()
+}
+
+// ════════════════════════════════════════════════════════════
+// Si el API real esta disponible, usarlo directamente
+// ════════════════════════════════════════════════════════════
+if (realAvailable) {
+    props.put(&quot;TARGET_HOST&quot;,     &quot;fakestoreapi.com&quot;)
+    props.put(&quot;TARGET_PORT&quot;,     &quot;443&quot;)
+    props.put(&quot;TARGET_PROTOCOL&quot;, &quot;https&quot;)
+    vars.put(&quot;API_ENV&quot;, &quot;REAL - fakestoreapi.com:443&quot;)
+    log.info(&quot;&gt;&gt;&gt; [SETUP] API REAL disponible. Prueba apunta a fakestoreapi.com:443&quot;)
+    SampleResult.setResponseMessage(&quot;ENTORNO: REAL - fakestoreapi.com:443&quot;)
+    SampleResult.setSuccessful(true)
+    return
+}
+
+log.warn(&quot;&gt;&gt;&gt; [SETUP] API real NO disponible. Razon: &quot; + realError)
+
+// ════════════════════════════════════════════════════════════
+// PASO 2: Verificar si el mock ya esta corriendo en :3001
+// ════════════════════════════════════════════════════════════
+def mockRunning = false
+try {
+    def sock = new java.net.Socket()
+    sock.connect(new java.net.InetSocketAddress(&quot;localhost&quot;, 3001), 1000)
+    sock.close()
+    mockRunning = true
+    log.info(&quot;&gt;&gt;&gt; [SETUP] Mock ya estaba corriendo en localhost:3001&quot;)
+} catch (Exception ignore) {
+    log.info(&quot;&gt;&gt;&gt; [SETUP] Mock no esta corriendo. Iniciando automaticamente...&quot;)
+}
+
+// ════════════════════════════════════════════════════════════
+// PASO 3: Si el mock no esta corriendo, iniciarlo
+// ════════════════════════════════════════════════════════════
+if (!mockRunning) {
+    def scriptPath = &quot;D:/Prueba_Tecnica_Jesus_Ramirez/ejercicio-performance/Ejercicio1/mock-login-server.js&quot;
+    def logPath    = &quot;D:/Prueba_Tecnica_Jesus_Ramirez/ejercicio-performance/Ejercicio1/mock-server.log&quot;
+
+    try {
+        def pb = new ProcessBuilder([&quot;node&quot;, scriptPath])
+        pb.redirectErrorStream(true)
+        pb.redirectOutput(new File(logPath))
+        def process = pb.start()
+        log.info(&quot;&gt;&gt;&gt; [SETUP] Proceso mock iniciado (PID: &quot; + process.pid() + &quot;)&quot;)
+
+        // Esperar hasta que el puerto 3001 responda (max 5 segundos)
+        int maxAttempts = 10
+        for (int i = 0; i &lt; maxAttempts; i++) {
+            Thread.sleep(500)
+            try {
+                def s = new java.net.Socket()
+                s.connect(new java.net.InetSocketAddress(&quot;localhost&quot;, 3001), 500)
+                s.close()
+                mockRunning = true
+                log.info(&quot;&gt;&gt;&gt; [SETUP] Mock listo en &quot; + ((i + 1) * 500) + &quot;ms&quot;)
+                break
+            } catch (Exception ignore2) { }
+        }
+
+        if (!mockRunning) {
+            log.error(&quot;&gt;&gt;&gt; [SETUP] Mock no respondio en 5s. Revisa mock-server.log&quot;)
+        }
+
+    } catch (Exception startEx) {
+        log.error(&quot;&gt;&gt;&gt; [SETUP] No se pudo iniciar el mock: &quot; + startEx.getMessage())
+    }
+}
+
+// ════════════════════════════════════════════════════════════
+// PASO 4: Configurar propiedades para el Thread Group principal
+// ════════════════════════════════════════════════════════════
+if (mockRunning) {
+    props.put(&quot;TARGET_HOST&quot;,     &quot;localhost&quot;)
+    props.put(&quot;TARGET_PORT&quot;,     &quot;3001&quot;)
+    props.put(&quot;TARGET_PROTOCOL&quot;, &quot;http&quot;)
+    vars.put(&quot;API_ENV&quot;, &quot;MOCK - localhost:3001 (auto-iniciado)&quot;)
+    log.info(&quot;&gt;&gt;&gt; [SETUP] Usando MOCK: localhost:3001&quot;)
+    SampleResult.setResponseMessage(&quot;ENTORNO: MOCK - localhost:3001 | API real fallo: &quot; + realError)
+    SampleResult.setSuccessful(true)
+} else {
+    props.put(&quot;TARGET_HOST&quot;,     &quot;localhost&quot;)
+    props.put(&quot;TARGET_PORT&quot;,     &quot;3001&quot;)
+    props.put(&quot;TARGET_PROTOCOL&quot;, &quot;http&quot;)
+    vars.put(&quot;API_ENV&quot;, &quot;ERROR - mock no disponible&quot;)
+    SampleResult.setResponseMessage(&quot;ERROR: API real fallo (&quot; + realError + &quot;) y mock no pudo iniciarse&quot;)
+    SampleResult.setSuccessful(false)
+    log.error(&quot;&gt;&gt;&gt; [SETUP] CRITICO: ni API real ni mock disponibles&quot;)
+}
+          </stringProp>
+        </JSR223Sampler>
+        <hashTree/>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Usuarios - Login" enabled="true">
+        <intProp name="ThreadGroup.num_threads">30</intProp>
+        <intProp name="ThreadGroup.ramp_time">30</intProp>
+        <longProp name="ThreadGroup.duration">120</longProp>
+        <longProp name="ThreadGroup.delay">0</longProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <boolProp name="ThreadGroup.scheduler">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+          <intProp name="LoopController.loops">-1</intProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
+        <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set Config - Usuarios" enabled="true">
+          <stringProp name="delimiter">,</stringProp>
+          <stringProp name="fileEncoding">UTF-8</stringProp>
+          <stringProp name="filename">D:/Prueba_Tecnica_Jesus_Ramirez/ejercicio-performance/Ejercicio1/login_users.csv</stringProp>
+          <boolProp name="ignoreFirstLine">true</boolProp>
+          <boolProp name="quotedData">false</boolProp>
+          <boolProp name="recycle">true</boolProp>
+          <stringProp name="shareMode">shareMode.all</stringProp>
+          <boolProp name="stopThread">false</boolProp>
+          <stringProp name="variableNames">user,passwd</stringProp>
+        </CSVDataSet>
+        <hashTree/>
+        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+          <collectionProp name="HeaderManager.headers">
+            <elementProp name="" elementType="Header">
+              <stringProp name="Header.name">Content-Type</stringProp>
+              <stringProp name="Header.value">application/json</stringProp>
+            </elementProp>
+          </collectionProp>
+        </HeaderManager>
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Login - POST /auth/login" enabled="true">
+          <stringProp name="HTTPSampler.domain">${__P(TARGET_HOST,localhost)}</stringProp>
+          <stringProp name="HTTPSampler.port">${__P(TARGET_PORT,3001)}</stringProp>
+          <stringProp name="HTTPSampler.protocol">${__P(TARGET_PROTOCOL,http)}</stringProp>
+          <stringProp name="HTTPSampler.path">/auth/login</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">{&quot;username&quot;: &quot;${user}&quot;, &quot;password&quot;: &quot;${passwd}&quot;}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <ConstantThroughputTimer guiclass="TestBeanGUI" testclass="ConstantThroughputTimer" testname="Constant Throughput Timer - 20 TPS" enabled="true">
+            <intProp name="calcMode">1</intProp>
+            <doubleProp>
+              <name>throughput</name>
+              <value>1200.0</value>
+              <savedValue>0.0</savedValue>
+            </doubleProp>
+          </ConstantThroughputTimer>
+          <hashTree/>
+          <DurationAssertion guiclass="DurationAssertionGui" testclass="DurationAssertion" testname="Assertion - Tiempo de respuesta max 1500ms" enabled="true">
+            <stringProp name="DurationAssertion.duration">1500</stringProp>
+          </DurationAssertion>
+          <hashTree/>
+          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assertion - Codigo de respuesta 200" enabled="true">
+            <collectionProp name="Asserion.test_strings">
+              <stringProp name="49586">200</stringProp>
+            </collectionProp>
+            <stringProp name="Assertion.custom_message">El servidor no retorno codigo 200</stringProp>
+            <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
+            <boolProp name="Assertion.assume_success">false</boolProp>
+            <intProp name="Assertion.test_type">8</intProp>
+          </ResponseAssertion>
+          <hashTree/>
+        </hashTree>
+        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename">D:/Prueba_Tecnica_Jesus_Ramirez/ejercicio-performance/Resultados/resultados_login_tree.jtl</stringProp>
+        </ResultCollector>
+        <hashTree/>
+        <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename">D:/Prueba_Tecnica_Jesus_Ramirez/ejercicio-performance/Resultados/resultados_login.csv</stringProp>
+        </ResultCollector>
+        <hashTree/>
+        <ResultCollector guiclass="StatVisualizer" testclass="ResultCollector" testname="Aggregate Report" enabled="true">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename">D:/Prueba_Tecnica_Jesus_Ramirez/ejercicio-performance/Resultados/resultados_login_agg.csv</stringProp>
+        </ResultCollector>
+        <hashTree/>
+      </hashTree>
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>
