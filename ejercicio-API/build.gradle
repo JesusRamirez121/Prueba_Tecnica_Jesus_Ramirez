@@ -2,19 +2,63 @@ plugins {
     id 'java'
 }
 
-group = 'com.co.jesusr'
+group   = 'com.co.jesusr'
 version = '1.0-SNAPSHOT'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
+    // JUnit 5 BOM – gestiona versiones de JUnit de forma consistente
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testRuntimeOnly    'org.junit.platform:junit-platform-launcher'
+
+    // Karate DSL – incluye JUnit 5 runner + HTTP client + reporter
+    testImplementation 'com.intuit.karate:karate-junit5:1.4.0'
+}
+
+// ── Incluir src/test/java en los recursos del classpath ───────────────
+// Karate necesita encontrar los .feature desde el classpath.
+// Esta configuración hace que los feature files co-localizados con
+// los runners también sean accesibles en tiempo de ejecución.
+sourceSets {
+    test {
+        resources {
+            srcDir 'src/test/java'   // incluye los .feature de src/test/java/
+            srcDir 'src/test/resources'
+        }
+    }
+}
+
+// ── Evitar duplicados al copiar recursos ──────────────────────────────
+// Cuando src/test/java y src/test/resources tienen el mismo archivo
+// (karate-config.js), Gradle lanza error de duplicado.
+// EXCLUDE: la primera ocurrencia gana (src/test/java tiene precedencia).
+processTestResources {
+    duplicatesStrategy = org.gradle.api.file.DuplicatesStrategy.EXCLUDE
 }
 
 test {
     useJUnitPlatform()
+
+    // Mostrar resultado de cada test en consola
+    testLogging {
+        events         'passed', 'skipped', 'failed'
+        exceptionFormat 'full'
+        showStandardStreams = false
+    }
+
+    // Continuar aunque fallen tests (para ver todos los resultados)
+    ignoreFailures = false
+
+    // Asegura que el output de Karate se genere en target/
+    // (Karate siempre usa target/karate-reports/ por convención Maven)
+    systemProperty 'karate.options', ''
 }

@@ -1,0 +1,161 @@
+================================================================
+  HALLAZGOS Y CONCLUSIONES DEL EJERCICIO
+  Automatización API REST - PetStore Swagger
+  Framework: Karate DSL + Patrón Screenplay
+  Autor: Jesus Ramirez
+================================================================
+
+OBJETIVO DEL EJERCICIO
+-----------------------
+Automatizar las pruebas de los endpoints de usuario de la API
+PetStore (https://petstore.swagger.io/v2), cubriendo el ciclo
+completo: Crear → Buscar → Actualizar → Buscar → Eliminar,
+aplicando el patrón de diseño Screenplay.
+
+HALLAZGOS TECNICOS DE LA API PETSTORE
+---------------------------------------
+
+1. ENDPOINT POST /user — Crear usuario
+   - Acepta un objeto User completo con campos obligatorios:
+     id, username, firstName, lastName, email, password, phone, userStatus.
+   - Respuesta exitosa: HTTP 200 con body:
+     { "code": 200, "type": "unknown", "message": "<userId>" }
+   - El campo "message" devuelve el ID del usuario creado como STRING.
+   - NO valida duplicados de username: permite crear el mismo usuario
+     varias veces (API de demo, sin restricciones de unicidad real).
+   - No hay validación de formato de email ni de contraseña.
+
+2. ENDPOINT GET /user/{username} — Buscar usuario
+   - Devuelve el objeto User completo con todos los campos.
+   - Si el usuario no existe: HTTP 404 con body:
+     { "code": 1, "type": "error", "message": "User not found" }
+   - El campo "userStatus" devuelve un entero (0 o 1).
+   - La búsqueda es sensible a mayúsculas/minúsculas en el username.
+
+3. ENDPOINT PUT /user/{username} — Actualizar usuario
+   - Requiere el objeto User completo en el body (no PATCH parcial).
+   - Solo los campos enviados en el body se actualizan.
+   - Respuesta exitosa: HTTP 200 con body:
+     { "code": 200, "type": "unknown", "message": "<userId>" }
+   - El username en el path y en el body deben coincidir para evitar
+     comportamiento inesperado (la API no valida esta consistencia).
+
+4. ENDPOINT DELETE /user/{username} — Eliminar usuario
+   - Respuesta exitosa: HTTP 200 con body:
+     { "code": 200, "type": "unknown", "message": "<username>" }
+   - El campo "message" devuelve el USERNAME eliminado (no el ID).
+   - Si el usuario ya fue eliminado: HTTP 404.
+   - Tras la eliminación, GET /user/{username} devuelve HTTP 404.
+
+5. COMPORTAMIENTO GENERAL DE LA API
+   - La API PetStore es de propósito demostrativo; los datos pueden
+     ser reiniciados periódicamente por los administradores.
+   - Tiempos de respuesta promedio: 200-800ms (varía por servidor).
+   - No requiere autenticación para los endpoints de usuario.
+   - Acepta y devuelve JSON exclusivamente en estos endpoints.
+   - SSL/TLS habilitado; Karate maneja SSL automáticamente.
+
+PATRON DE DISEÑO APLICADO: SCREENPLAY EN KARATE
+-------------------------------------------------
+
+El patrón Screenplay se implementó de la siguiente manera:
+
+  CONCEPTO SCREENPLAY    → IMPLEMENTACION EN KARATE
+  ─────────────────────────────────────────────────────────────────
+  Actor                  → Contexto de prueba / karate-config.js
+                           (define habilidades: baseUrl, datos, etc.)
+
+  Habilidad (Ability)    → Karate HTTP Client integrado
+                           (capacidad de hacer llamadas REST)
+
+  Tarea (Task)           → Feature files en tasks/ con @ignore
+                           Cada tarea encapsula una operación REST:
+                           crear-usuario.feature
+                           buscar-usuario.feature
+                           actualizar-usuario.feature
+                           eliminar-usuario.feature
+
+  Interacción            → Given/When/Then dentro de cada tarea
+  (Interaction)            (detalles de bajo nivel del HTTP request)
+
+  Pregunta (Question)    → "And match response..." en los escenarios
+                           (verificación del estado del sistema)
+
+  Escenario (Stage)      → Background + configuración en karate-config.js
+
+El TC-005 demuestra el patrón explícitamente:
+  * def resultado = call read('tasks/eliminar-usuario.feature')
+  El Actor NO interactúa directamente con DELETE /user/{username}.
+  Delega en la Tarea, que conoce los detalles de la interacción.
+  Luego el Actor verifica el resultado con assertions (Preguntas).
+
+VENTAJAS DE KARATE PARA PRUEBAS API
+-------------------------------------
+1. SINTAXIS GHERKIN NATIVA: Los feature files son legibles para QA
+   no técnicos y alinean con la documentación de negocio.
+
+2. SIN CÓDIGO JAVA ADICIONAL: Las interacciones HTTP, assertions y
+   manejo de JSON se hacen directamente en los feature files.
+   No se necesita código Java para los tests (solo para el Runner).
+
+3. VARIABLES Y REUTILIZACIÓN: El sistema de variables permite
+   pasar datos entre pasos y entre features (via `call`).
+
+4. ASSERTIONS POTENTES: `match` soporta fuzzy matching, regex,
+   schema validation (#notnull, #string, #number, #array, etc.).
+
+5. REPORTES INCLUIDOS: Karate genera HTML reports con request/response
+   completos sin configuración adicional.
+
+6. INTEGRACIÓN CON JUNIT 5: El runner JUnit 5 se integra con Gradle,
+   IntelliJ IDEA y pipelines CI/CD sin configuración extra.
+
+COMPARATIVA CON OTRAS HERRAMIENTAS
+-------------------------------------
+| Criterio              | Karate  | REST Assured | Postman  |
+|─────────────────────────────────────────────────────────|
+| Curva de aprendizaje  | Baja    | Media        | Muy baja |
+| Reutilización de código| Alta   | Media        | Baja     |
+| Integración CI/CD     | Nativa  | Nativa       | Requiere Newman|
+| Reportes              | HTML auto| Surefire    | Newman HTML|
+| Patrón Screenplay     | Via call | Java nativo | No soporta|
+| BDD/Gherkin           | Nativo  | No           | No       |
+
+CONCLUSIONES GENERALES
+-----------------------
+1. Karate es la herramienta ideal para pruebas de API REST por su
+   sintaxis intuitiva, sin necesidad de código Java adicional y por
+   la generación automática de reportes detallados.
+
+2. El patrón Screenplay en Karate se implementa naturalmente usando
+   feature files reutilizables (tasks) y el mecanismo `call`.
+   Esto permite modularidad y separación de responsabilidades similar
+   a la implementación con Serenity Screenplay en pruebas UI.
+
+3. La API PetStore demostró ser funcional para pruebas de integración
+   básicas, aunque tiene limitaciones como: no valida duplicados de
+   username, acepta cualquier formato de email, y los datos son efímeros.
+
+4. La organización del flujo TC-001→TC-006 garantiza la ejecución
+   ordenada del ciclo completo CRUD, con el TC-006 actuando como
+   verificación final de limpieza del estado del sistema.
+
+5. La centralización de datos de prueba en karate-config.js facilita
+   el mantenimiento: cambiar el username o la URL base requiere
+   modificar únicamente un archivo.
+
+AREAS DE MEJORA IDENTIFICADAS
+-------------------------------
+1. DATA-DRIVEN TESTING: Usar tablas Cucumber (Examples) para
+   probar múltiples usuarios con diferentes combinaciones de datos.
+2. USERNAME DINAMICO: Generar username aleatorio en karate-config.js
+   para evitar conflictos en ejecuciones paralelas.
+3. VALIDACION DE SCHEMA: Agregar validación completa del schema JSON
+   usando los matchers avanzados de Karate (#string, #number, etc.).
+4. MOCKING: Usar el servidor mock de Karate para pruebas offline.
+5. CI/CD: Integrar con GitHub Actions para ejecución automática
+   en cada push al repositorio.
+
+FECHA: Abril 2026
+API PROBADA: https://petstore.swagger.io/v2
+FRAMEWORK: Karate DSL 1.4.0 + JUnit 5.10.0 + Gradle
