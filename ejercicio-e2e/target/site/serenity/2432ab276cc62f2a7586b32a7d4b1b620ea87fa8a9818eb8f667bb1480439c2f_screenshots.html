@@ -1,0 +1,302 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>Screenshots</title>
+
+<link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+<link rel="apple-touch-icon" sizes="57x57" href="apple-icon-57x57.png">
+<link rel="apple-touch-icon" sizes="60x60" href="apple-icon-60x60.png">
+<link rel="apple-touch-icon" sizes="72x72" href="apple-icon-72x72.png">
+<link rel="apple-touch-icon" sizes="76x76" href="apple-icon-76x76.png">
+<link rel="apple-touch-icon" sizes="114x114" href="apple-icon-114x114.png">
+<link rel="apple-touch-icon" sizes="120x120" href="apple-icon-120x120.png">
+<link rel="apple-touch-icon" sizes="144x144" href="apple-icon-144x144.png">
+<link rel="apple-touch-icon" sizes="152x152" href="apple-icon-152x152.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-icon-180x180.png">
+<link rel="icon" type="image/png" sizes="192x192"  href="android-icon-192x192.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+<meta name="msapplication-TileColor" content="#ffffff">
+<meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+<meta name="theme-color" content="#ffffff">
+<link rel="stylesheet" href="bootstrap-icons/bootstrap-icons.css">
+<!-- JQuery -->
+<script type="text/javascript" src="scripts/jquery-1.11.1.min.js"></script><!-- Required Stylesheets -->
+<link href="bootstrap-treeview/dist/bootstrap-treeview.min.css" rel="stylesheet">
+
+<!-- Required Javascript -->
+<script src="bootstrap-treeview/dist/bootstrap-treeview.min.js"></script><!-- DataTables -->
+<link type="text/css" href="datatables/1.13.1/datatables.min.css" rel="stylesheet" />
+<script type="text/javascript" src="datatables/1.13.1/datatables.min.js"></script>
+<script type="text/javascript" src="datatables/1.13.1/time-elapsed-dhms.js"></script>
+
+<link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+<script src="bootstrap/js/bootstrap.min.js"></script>
+
+
+<script>
+    jQuery.fn.dataTable.ext.type.order['time-elapsed-dhms-pre'] = function(data) {
+
+        var matches = data.match(/^(\d+(?:\.\d+)?)\s*([a-z]+)/i);
+        var multipliers = {
+            ms: 1,
+            s: 1000,
+            m: 60000,
+            h: 3600000,
+            d: 86400000
+        };
+
+        if (matches) {
+            var multiplier = multipliers[matches[2].toLowerCase()];
+            return parseFloat(matches[1]) * multiplier;
+        } else {
+            return -1;
+        };
+    };
+</script>
+<link rel="stylesheet" href="css/core.css"/>
+<link rel="stylesheet" href="css/link.css"/>
+<link type="text/css" media="screen" href="css/screen.css" rel="Stylesheet"/>
+<!--CHART.JS-->
+<script src="chartjs/chart.js"></script>
+<script src="chartjs/chartjs-plugin-datalabels@2.0.0.min.js"></script>
+<script src="chartjs/patternomaly.min.js"></script>
+<script>
+    // Register the plugin to all charts:
+    Chart.register(ChartDataLabels);
+</script>
+<!-- Nivo Slider -->
+<link rel="stylesheet" href="nivo-slider/3.2/nivo-slider.css" type="text/css" media="screen" />
+<link rel="stylesheet" href="nivo-slider/3.2/themes/default/default.css" type="text/css" media="screen" />
+<script src="nivo-slider/3.2/jquery.nivo.slider.pack.js" type="text/javascript"></script>
+
+    <script type="text/javascript">
+
+        function getUrlVars() {
+            var vars = {};
+            var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function (m, key, value) {
+                vars[key] = value;
+            });
+            return vars;
+        }
+
+        var screenshotIndex = getUrlVars()["screenshot"];
+
+        $(window).load(function () {
+            $('#slider').nivoSlider({
+                startSlide: screenshotIndex,
+                effect: 'fade',
+                animSpeed: 200,
+                manualAdvance: true
+            });
+        });
+
+        $(window).keydown(function(e) {
+            switch(e.which) {
+                case 37:
+                    $('a.nivo-prevNav').click();
+                    break;
+                case 39:
+                    $('a.nivo-nextNav').click();
+                    break;
+            }
+        });
+    </script>
+
+</head>
+
+<body>
+<div id="topheader">
+    <div id="topbanner">
+        <div id="logo"><a href="index.html"><img src="images/serenity-logo.png" border="0"/></a></div>
+        <div id="projectname-banner" style="float:right">
+            <span class="projectname">
+                <span class="projecttitle">Serenity BDD Report</span>
+                <span class="projectsubtitle"></span>
+            </span>
+        </div>
+    </div>
+</div>
+
+<div class="middlecontent">
+    <div id="contenttop">
+        <div class="middlebg">
+            <span class="breadcrumbs">
+                <a href="index.html">Home</a>
+                > <span class="truncate-40"><a
+                    href="776dab73324203b57486e44a592b575b2921abba33f530490254fb3f0746a34d.html">Comprar</a></span>
+                > <span class="truncate-60"><a
+                    href="2432ab276cc62f2a7586b32a7d4b1b620ea87fa8a9818eb8f667bb1480439c2f.html">Compra exitosa de dos productos como usuario invitado </a></span>
+                > Screenshots
+            </span>
+        </div>
+        <div class="rightbg"></div>
+    </div>
+
+    <div class="clr"></div>
+
+    <!--/* starts second table*/-->
+<div>
+    <ul class="nav nav-tabs" role="tablist">
+        <li class="active">
+            <a href="#"><i class="bi bi-journal-check"></i> Overall Test Results</a>
+        </li>
+        <li >
+            <a href="capabilities.html"><i class="bi bi-journal-text"></i> Requirements</a>
+        </li>
+        <li >
+            <a href="576946480b52ad056d6f5bddf874399c83582ecf90963cc074a14c70580e7d9f.html"><i class="bi bi-chat-text"></i> Features</a>
+        </li>
+    </ul>
+    <span class="date-and-time"><a href="build-info.html"><i class="bi bi-info-circle"></i></a> Report generated 09-04-2026 23:14</span>
+    <br style="clear:left"/>
+</div>
+
+    <div class="clr"></div>
+
+
+    <div id="contentbody">
+        <div class="titlebar">
+            <div class="story-title">
+                <table class="outcome-header">
+                    <tr>
+                        <td>
+                            <div>
+                                <h3 class="discreet-story-header">
+                                    <i class="fs-2 bi bi-chat-left-quote large-icon"></i>
+                                    <span class="story-header-title">Flujo De Compra En Opencart </span>
+                                    <span class="badge tag-badge" style="">Feature</span>
+                                </h3>
+
+                                <div class="discreet-requirement-narrative-title">
+                                Como usuario no registrado en la tienda OpenCart<br />
+Quiero agregar dos productos al carrito y completar la compra como invitado<br />
+Para finalizar mi pedido exitosamente sin necesidad de crear una cuenta
+                                </div>
+                            </div>
+
+                        </td>
+                        <td valign="top" align="right">
+                            <p class="tag">
+                                <span class="badge tag-badge" style="background:default;"
+                                    <i class="bi bi-tag-fill"></i>&nbsp;<a class="tagLink" style="background:default;" href="34658a1663fcf042bd7acb3325affbe4e647c8acd84d0228be2f52e1381e61b9.html">10 To 30 Seconds
+                                        (Duration)
+                                </a>
+                                </span>
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="story-title">
+                <table class="outcome-header">
+                    <tr>
+                        <td colspan="2" class="test-title-bar">
+                            <span class="outcome-icon"><a href='##beforetable'><i class='bi bi-check-circle-fill success-icon fa-2x' title='SUCCESS'></i></a></span>
+                            <span class="test-case-title">
+                                <span class="success-color">Compra exitosa de dos productos como usuario invitado
+                                    <span class="related-issue-title"></span>
+                                </span>
+                            </span>
+
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="clr"></div>
+
+
+    <div id="beforetable"></div>
+    <div id="contenttilttle">
+        <div class="slider-wrapper theme-default">
+            <div id="slider">
+                <img src="cdf89d95fb25dbd32570ba5f7023ad30029c26e1936013249c5be728ab5137ff.png" title=" Dado que el usuario est&aacute; en la p&aacute;gina principal de OpenCart" width="0"/>
+                <img src="cdf89d95fb25dbd32570ba5f7023ad30029c26e1936013249c5be728ab5137ff.png" title=" ATM opens the Pagina principal ui" width="0"/>
+                <img src="cdf89d95fb25dbd32570ba5f7023ad30029c26e1936013249c5be728ab5137ff.png" title=" Dado que el usuario est&aacute; en la p&aacute;gina principal de OpenCart (completed)" width="0"/>
+                <img src="e576ddbe1a44a47dee893c0ba66b34dd081e08d1611407772425fb0c5ea2b2ef.png" title=" Cuando el usuario agrega el producto &quot;MacBook&quot; al carrito de compras" width="0"/>
+                <img src="e576ddbe1a44a47dee893c0ba66b34dd081e08d1611407772425fb0c5ea2b2ef.png" title=" Atm buscar y agregar producto task" width="0"/>
+                <img src="e576ddbe1a44a47dee893c0ba66b34dd081e08d1611407772425fb0c5ea2b2ef.png" title=" ATM enters 'MacBook' into campo de b&uacute;squeda" width="0"/>
+                <img src="a914d319c3b60d6f674543d549e2666171dc3737a7c63c1f2b48cc64ef9b5c86.png" title=" ATM clicks on bot&oacute;n buscar" width="0"/>
+                <img src="0879742da570e1395bf21ee6a11a1a62084ee90ad3724110f963b42f6ec16a74.png" title=" ATM clicks on enlace del producto 'MacBook'" width="0"/>
+                <img src="869ac0e829a6472a9c9daa2a452af9ac4f6826e42ae6b95a5e7bbf15199c521c.png" title=" ATM clicks on bot&oacute;n Agregar al Carrito" width="0"/>
+                <img src="5b906f8e920d7a45051d7558e204af8289bc6402a2dd2e203e89bb8ce9ad58ca.png" title=" Atm buscar y agregar producto task (completed)" width="0"/>
+                <img src="5b906f8e920d7a45051d7558e204af8289bc6402a2dd2e203e89bb8ce9ad58ca.png" title=" Cuando el usuario agrega el producto &quot;MacBook&quot; al carrito de compras (completed)" width="0"/>
+                <img src="8f6ec21d7c85591bc6702ee5c04c398bbcd390b28ff710f7e23c72e5533a615b.png" title=" Y el usuario agrega el producto &quot;iPhone&quot; al carrito de compras" width="0"/>
+                <img src="8f6ec21d7c85591bc6702ee5c04c398bbcd390b28ff710f7e23c72e5533a615b.png" title=" Atm buscar y agregar producto task" width="0"/>
+                <img src="8f6ec21d7c85591bc6702ee5c04c398bbcd390b28ff710f7e23c72e5533a615b.png" title=" ATM enters 'iPhone' into campo de b&uacute;squeda" width="0"/>
+                <img src="1ab4843385e746fe109022dc50be99749bad92c8192f3a5b5ff7a589a6b943d7.png" title=" ATM clicks on bot&oacute;n buscar" width="0"/>
+                <img src="ec293211ce2d1c0747732ddf53ed1a6a6a6a1022f89cb2b7b08e1142c1b8ea3b.png" title=" ATM clicks on enlace del producto 'iPhone'" width="0"/>
+                <img src="03d96ec277599e47f88aeab100e4242f3586dacfd17dae6f792a65f1e566f683.png" title=" ATM clicks on bot&oacute;n Agregar al Carrito" width="0"/>
+                <img src="0efc283ae28b1d0824f8d13d8c4d174d566b8805c311c09981f5d65c284c95d9.png" title=" Atm buscar y agregar producto task (completed)" width="0"/>
+                <img src="0efc283ae28b1d0824f8d13d8c4d174d566b8805c311c09981f5d65c284c95d9.png" title=" Y el usuario agrega el producto &quot;iPhone&quot; al carrito de compras (completed)" width="0"/>
+                <img src="1cac12301de8d689fd482f2bc12ea68a77c0ffa5825c788f48c1400381fb7f97.png" title=" Y visualiza el carrito de compras" width="0"/>
+                <img src="1cac12301de8d689fd482f2bc12ea68a77c0ffa5825c788f48c1400381fb7f97.png" title=" Atm ver carrito de compras task" width="0"/>
+                <img src="1cac12301de8d689fd482f2bc12ea68a77c0ffa5825c788f48c1400381fb7f97.png" title=" ATM clicks on bot&oacute;n del carrito" width="0"/>
+                <img src="a72bb0add190a1b334e277d08f6e7c690baa4b0b0ce57da0ff6ebef61b1b982c.png" title=" ATM clicks on enlace Ver Carrito" width="0"/>
+                <img src="a72bb0add190a1b334e277d08f6e7c690baa4b0b0ce57da0ff6ebef61b1b982c.png" title=" Atm ver carrito de compras task (completed)" width="0"/>
+                <img src="a72bb0add190a1b334e277d08f6e7c690baa4b0b0ce57da0ff6ebef61b1b982c.png" title=" Y visualiza el carrito de compras (completed)" width="0"/>
+                <img src="a72bb0add190a1b334e277d08f6e7c690baa4b0b0ce57da0ff6ebef61b1b982c.png" title=" Entonces el carrito muestra los productos agregados" width="0"/>
+                <img src="f24f136ad05af01251246efa65ed335c1b0b91d32df5316e57aec19eed3fceb9.png" title=" Cuando procede al proceso de checkout" width="0"/>
+                <img src="f24f136ad05af01251246efa65ed335c1b0b91d32df5316e57aec19eed3fceb9.png" title=" Atm proceder al checkout task" width="0"/>
+                <img src="f24f136ad05af01251246efa65ed335c1b0b91d32df5316e57aec19eed3fceb9.png" title=" ATM clicks on bot&oacute;n Checkout" width="0"/>
+                <img src="f24f136ad05af01251246efa65ed335c1b0b91d32df5316e57aec19eed3fceb9.png" title=" Atm proceder al checkout task (completed)" width="0"/>
+                <img src="f24f136ad05af01251246efa65ed335c1b0b91d32df5316e57aec19eed3fceb9.png" title=" Cuando procede al proceso de checkout (completed)" width="0"/>
+                <img src="93762f4bbfc0ad06903426e68e5db8f4bb7f59ee16338243b3e5421011df7d18.png" title=" Y elige continuar como invitado" width="0"/>
+                <img src="93762f4bbfc0ad06903426e68e5db8f4bb7f59ee16338243b3e5421011df7d18.png" title=" Atm seleccionar guest checkout task" width="0"/>
+                <img src="93762f4bbfc0ad06903426e68e5db8f4bb7f59ee16338243b3e5421011df7d18.png" title=" ATM clicks on opci&oacute;n Guest Checkout" width="0"/>
+                <img src="a6e4f9bdca0dcbeec81d0e52318638f7b154dfdf5aaee2340bfe9336792e90f9.png" title=" ATM clicks on bot&oacute;n Continuar (tipo de cuenta)" width="0"/>
+                <img src="a6e4f9bdca0dcbeec81d0e52318638f7b154dfdf5aaee2340bfe9336792e90f9.png" title=" Atm seleccionar guest checkout task (completed)" width="0"/>
+                <img src="a6e4f9bdca0dcbeec81d0e52318638f7b154dfdf5aaee2340bfe9336792e90f9.png" title=" Y elige continuar como invitado (completed)" width="0"/>
+                <img src="4922b6e30462454e2e484589903c6489f2b0b8f63e9738a317d4939959fc3ef8.png" title=" Y completa los datos de facturaci&oacute;n del invitado" width="0"/>
+                <img src="4922b6e30462454e2e484589903c6489f2b0b8f63e9738a317d4939959fc3ef8.png" title=" Atm completar formulario facturacion task" width="0"/>
+                <img src="4922b6e30462454e2e484589903c6489f2b0b8f63e9738a317d4939959fc3ef8.png" title=" ATM enters 'Juan' into campo Nombre" width="0"/>
+                <img src="efef64bdc80f2359ccd7e680d7537a7796748965f4f75836c51c76ec85bd168e.png" title=" ATM enters 'Perez' into campo Apellido" width="0"/>
+                <img src="a3b1ed3676b43db708a6af01e0211b4f450b54212672b12675401aecbc6e2050.png" title=" ATM enters 'juan.perez.test@mailtest.com' into campo Email" width="0"/>
+                <img src="a49557eb785eb506a651cbfcf55338e3589bb44c3f3a30f3a92a8673d4c6b070.png" title=" ATM enters '3001234567' into campo Tel&eacute;fono" width="0"/>
+                <img src="5a7e750e77f1ef9dbe534ef1af200a58eb8cdb176992075a9221290ba632c935.png" title=" ATM enters 'Calle 123 # 45-67' into campo Direcci&oacute;n" width="0"/>
+                <img src="4a8d37a822dae87c975bc3154c5d057ada6fdb0953661fff60f8929dfdc37847.png" title=" ATM enters 'Bogota' into campo Ciudad" width="0"/>
+                <img src="82c91dba928a50055db2e11b25a8b676a13d312564b028c5f42269d6823d252d.png" title=" ATM enters '110111' into campo C&oacute;digo Postal" width="0"/>
+                <img src="7704d5e4a0bb46d1e1c677513bc3c8cb5b547323f6177653af057d9a110830f2.png" title=" ATM selects Colombia on selector de Pa&iacute;s" width="0"/>
+                <img src="0f6944afa31c7957f4f76b04ddd58e3336709af2fba5e10744df43d1b8821a1f.png" title=" ATM selects index #index in selector de Regi&oacute;n/Estado" width="0"/>
+                <img src="ec20d2383efc9e50bead225d19de619a44089a1d1f8a48d484e787edeaaf361b.png" title=" ATM clicks on bot&oacute;n Continuar (facturaci&oacute;n)" width="0"/>
+                <img src="ec20d2383efc9e50bead225d19de619a44089a1d1f8a48d484e787edeaaf361b.png" title=" Atm completar formulario facturacion task (completed)" width="0"/>
+                <img src="ec20d2383efc9e50bead225d19de619a44089a1d1f8a48d484e787edeaaf361b.png" title=" Y completa los datos de facturaci&oacute;n del invitado (completed)" width="0"/>
+                <img src="8f2967ed556b68d2e1a9bc23e7e9be8313e0be6823dca3084a044cd565dda98a.png" title=" Y contin&uacute;a con los detalles de entrega" width="0"/>
+                <img src="8f2967ed556b68d2e1a9bc23e7e9be8313e0be6823dca3084a044cd565dda98a.png" title=" Atm continuar con entrega task" width="0"/>
+                <img src="8f2967ed556b68d2e1a9bc23e7e9be8313e0be6823dca3084a044cd565dda98a.png" title=" Y contin&uacute;a con los detalles de entrega (completed)" width="0"/>
+                <img src="1ef8dd12374eca45c94d00ae4ae8ccb0af193600012b2e488c3785b9024a5b10.png" title=" Y selecciona el m&eacute;todo de env&iacute;o disponible" width="0"/>
+                <img src="1ef8dd12374eca45c94d00ae4ae8ccb0af193600012b2e488c3785b9024a5b10.png" title=" Atm seleccionar metodo envio task" width="0"/>
+                <img src="1ef8dd12374eca45c94d00ae4ae8ccb0af193600012b2e488c3785b9024a5b10.png" title=" ATM clicks on bot&oacute;n Continuar (m&eacute;todo de env&iacute;o)" width="0"/>
+                <img src="1ef8dd12374eca45c94d00ae4ae8ccb0af193600012b2e488c3785b9024a5b10.png" title=" Atm seleccionar metodo envio task (completed)" width="0"/>
+                <img src="1ef8dd12374eca45c94d00ae4ae8ccb0af193600012b2e488c3785b9024a5b10.png" title=" Y selecciona el m&eacute;todo de env&iacute;o disponible (completed)" width="0"/>
+                <img src="d8193c7b6bac349f75639c16438c8bd728837730f52b1704773524169cd0a0c5.png" title=" Y selecciona el m&eacute;todo de pago y acepta los t&eacute;rminos" width="0"/>
+                <img src="d8193c7b6bac349f75639c16438c8bd728837730f52b1704773524169cd0a0c5.png" title=" Atm seleccionar pago y aceptar terminos task" width="0"/>
+                <img src="d8193c7b6bac349f75639c16438c8bd728837730f52b1704773524169cd0a0c5.png" title=" ATM clicks on bot&oacute;n Continuar (m&eacute;todo de pago)" width="0"/>
+                <img src="d8193c7b6bac349f75639c16438c8bd728837730f52b1704773524169cd0a0c5.png" title=" Atm seleccionar pago y aceptar terminos task (completed)" width="0"/>
+                <img src="d8193c7b6bac349f75639c16438c8bd728837730f52b1704773524169cd0a0c5.png" title=" Y selecciona el m&eacute;todo de pago y acepta los t&eacute;rminos (completed)" width="0"/>
+                <img src="d123ab96241b78916992e5be08d218d665e7df98676afca92f481d5dafb3e7a2.png" title=" Y confirma el pedido" width="0"/>
+                <img src="d123ab96241b78916992e5be08d218d665e7df98676afca92f481d5dafb3e7a2.png" title=" Atm confirmar pedido task" width="0"/>
+                <img src="d123ab96241b78916992e5be08d218d665e7df98676afca92f481d5dafb3e7a2.png" title=" ATM clicks on bot&oacute;n Confirmar Pedido" width="0"/>
+                <img src="d123ab96241b78916992e5be08d218d665e7df98676afca92f481d5dafb3e7a2.png" title=" Atm confirmar pedido task (completed)" width="0"/>
+                <img src="d123ab96241b78916992e5be08d218d665e7df98676afca92f481d5dafb3e7a2.png" title=" Y confirma el pedido (completed)" width="0"/>
+
+                <img src="18ce8fe1b4aff05f52ae0ce592d40068172e2a4d2e82a83a18b5996a4c38dff6.png" title=" Entonces debe ver el mensaje "Your order has been placed!": <span class='success-color'>SUCCESS</span>" width="0"/>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+<div id="beforefooter"></div>
+<div id="bottomfooter">
+    <span class="version">Serenity BDD version 4.2.1</span>
+</div>
+</body>
+</html>
