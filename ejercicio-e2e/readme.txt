@@ -77,7 +77,7 @@ OPCION A - Ejecucion completa (recomendada):
 1. Abrir una terminal (CMD o PowerShell).
 
 2. Navegar al directorio del proyecto:
-     cd UnidadDondeSeClono\DirDondeSeClono\ejercicio-e2e
+     cd ejercicio-e2e   (desde la carpeta raiz del repositorio clonado)
 
 3. Ejecutar el siguiente comando:
      .\gradlew.bat clean test aggregate
@@ -148,7 +148,7 @@ Pasos del flujo:
         Email:       juan.perez.test@mailtest.com
         Telefono:    3001234567
         Direccion:   Calle 123 # 45-67
-        CiudaUnidadDondeSeClono      Bogota
+        Ciudad:      Bogota
         Codigo ZIP:  110111
         Pais:        Colombia
   10. Continuar con la entrega
@@ -171,7 +171,7 @@ Capturas  : Despues de cada paso
 
 Para ejecutar en modo headless (sin interfaz grafica):
   Editar src/test/resources/serenity.conf y cambiar:
-    headless = false  -->  headless = true
+    headless.mode = false  -->  headless.mode = true
 
 ----------------------------------------------------------------
 NOTAS IMPORTANTES

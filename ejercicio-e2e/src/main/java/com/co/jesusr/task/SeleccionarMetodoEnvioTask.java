@@ -18,13 +18,10 @@ public class SeleccionarMetodoEnvioTask implements Task {
                         .forNoMoreThan(10).seconds()
         );
 
-        try {
-            var radioEnvio = PaginaCheckoutUI.RADIO_METODO_ENVIO.resolveFor(actor);
-            if (!radioEnvio.isSelected()) {
-                radioEnvio.click();
-            }
-        } catch (Exception ignorado) {
-            // Ya hay una opción de envío preseleccionada
+        // Si la opción de envío ya viene preseleccionada no hay nada que elegir.
+        var radios = PaginaCheckoutUI.RADIO_METODO_ENVIO.resolveAllFor(actor);
+        if (!radios.isEmpty() && !radios.get(0).isSelected()) {
+            radios.get(0).click();
         }
 
         actor.attemptsTo(

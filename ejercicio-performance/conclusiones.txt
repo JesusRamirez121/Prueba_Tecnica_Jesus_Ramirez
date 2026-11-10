@@ -1,3 +1,5 @@
+NOTA DE REVISION: el plan usa el mock local (localhost:3001) si la API real no responde 200/201 al iniciar. Antes de citar estos datos, confirmar en el log del setup qué entorno se uso (REAL o MOCK). Las cifras de tasa de error y tiempos de este documento no fueron re-medidas en la revision.
+
 ================================================================
 CONCLUSIONES Y HALLAZGOS - EJERCICIO 1
 PRUEBA DE CARGA: LOGIN FAKESTOREAPI

@@ -46,10 +46,10 @@ try {
     conn.getOutputStream().flush()
     int code = conn.getResponseCode()
     conn.disconnect()
-    if (code == 200) {
+    if (code == 200 || code == 201) {   // FakeStore devuelve 201 en login exitoso
         realAvailable = true
     } else {
-        realError = &quot;HTTP &quot; + code + &quot; (esperado 200)&quot;
+        realError = &quot;HTTP &quot; + code + &quot; (esperado 200 o 201)&quot;
     }
 } catch (Exception ex) {
     realError = ex.getClass().getSimpleName() + &quot;: &quot; + ex.getMessage()
@@ -89,8 +89,8 @@ try {
 // PASO 3: Si el mock no esta corriendo, iniciarlo
 // ════════════════════════════════════════════════════════════
 if (!mockRunning) {
-    def scriptPath = &quot;D:/Prueba_Tecnica_Jesus_Ramirez/ejercicio-performance/Ejercicio1/mock-login-server.js&quot;
-    def logPath    = &quot;D:/Prueba_Tecnica_Jesus_Ramirez/ejercicio-performance/Ejercicio1/mock-server.log&quot;
+    def scriptPath = &quot;mock-login-server.js&quot;
+    def logPath    = &quot;mock-server.log&quot;
 
     try {
         def pb = new ProcessBuilder([&quot;node&quot;, scriptPath])
@@ -163,7 +163,7 @@ if (mockRunning) {
         <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set Config - Usuarios" enabled="true">
           <stringProp name="delimiter">,</stringProp>
           <stringProp name="fileEncoding">UTF-8</stringProp>
-          <stringProp name="filename">D:/Prueba_Tecnica_Jesus_Ramirez/ejercicio-performance/Ejercicio1/login_users.csv</stringProp>
+          <stringProp name="filename">login_users.csv</stringProp>
           <boolProp name="ignoreFirstLine">true</boolProp>
           <boolProp name="quotedData">false</boolProp>
           <boolProp name="recycle">true</boolProp>
@@ -214,11 +214,12 @@ if (mockRunning) {
             <stringProp name="DurationAssertion.duration">1500</stringProp>
           </DurationAssertion>
           <hashTree/>
-          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assertion - Codigo de respuesta 200" enabled="true">
+          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assertion - Codigo de respuesta 200 o 201" enabled="true">
             <collectionProp name="Asserion.test_strings">
               <stringProp name="49586">200</stringProp>
+              <stringProp name="49587">201</stringProp>
             </collectionProp>
-            <stringProp name="Assertion.custom_message">El servidor no retorno codigo 200</stringProp>
+            <stringProp name="Assertion.custom_message">El servidor no retorno codigo 200 ni 201</stringProp>
             <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
             <boolProp name="Assertion.assume_success">false</boolProp>
             <intProp name="Assertion.test_type">8</intProp>
@@ -259,7 +260,7 @@ if (mockRunning) {
               <connectTime>true</connectTime>
             </value>
           </objProp>
-          <stringProp name="filename">D:/Prueba_Tecnica_Jesus_Ramirez/ejercicio-performance/Resultados/resultados_login_tree.jtl</stringProp>
+          <stringProp name="filename">../Resultados/resultados_login_tree.jtl</stringProp>
         </ResultCollector>
         <hashTree/>
         <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
@@ -296,7 +297,7 @@ if (mockRunning) {
               <connectTime>true</connectTime>
             </value>
           </objProp>
-          <stringProp name="filename">D:/Prueba_Tecnica_Jesus_Ramirez/ejercicio-performance/Resultados/resultados_login.csv</stringProp>
+          <stringProp name="filename">../Resultados/resultados_login.csv</stringProp>
         </ResultCollector>
         <hashTree/>
         <ResultCollector guiclass="StatVisualizer" testclass="ResultCollector" testname="Aggregate Report" enabled="true">
@@ -333,7 +334,7 @@ if (mockRunning) {
               <connectTime>true</connectTime>
             </value>
           </objProp>
-          <stringProp name="filename">D:/Prueba_Tecnica_Jesus_Ramirez/ejercicio-performance/Resultados/resultados_login_agg.csv</stringProp>
+          <stringProp name="filename">../Resultados/resultados_login_agg.csv</stringProp>
         </ResultCollector>
         <hashTree/>
       </hashTree>
