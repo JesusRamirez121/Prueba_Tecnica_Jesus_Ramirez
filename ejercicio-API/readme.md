@@ -39,7 +39,12 @@ ejercicio-API/
 └── src/test/
     ├── java/com/co/jesusr/
     │   ├── UserRunner.java
-    │   └── user.feature
+    │   ├── user.feature
+    │   └── tasks/              # Tareas Screenplay (@ignore)
+    │       ├── crear-usuario.feature
+    │       ├── buscar-usuario.feature
+    │       ├── actualizar-usuario.feature
+    │       └── eliminar-usuario.feature
     └── resources/
         └── karate-config.js
 ```

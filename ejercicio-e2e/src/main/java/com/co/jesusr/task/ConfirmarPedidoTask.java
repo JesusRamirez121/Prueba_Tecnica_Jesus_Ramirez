@@ -12,10 +12,12 @@ public class ConfirmarPedidoTask implements Task {
 
     @Override
     public <T extends Actor> void performAs(T actor) {
+        // La tienda demo carga la sección "Confirm Order" por AJAX después de
+        // "Continuar" en el paso de pago, y puede tardar más de 10 s (se ve "Loading...").
         actor.attemptsTo(
                 WaitUntil.the(PaginaCheckoutUI.BOTON_CONFIRMAR,
                                 WebElementStateMatchers.isClickable())
-                        .forNoMoreThan(10).seconds(),
+                        .forNoMoreThan(60).seconds(),
                 Click.on(PaginaCheckoutUI.BOTON_CONFIRMAR)
         );
     }

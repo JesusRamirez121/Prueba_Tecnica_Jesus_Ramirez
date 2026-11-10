@@ -1,120 +1,42 @@
-================================================================
-EJERCICIO 1 - PRUEBA DE CARGA: LOGIN FAKESTOREAPI
-================================================================
+# Ejercicios de Performance — JMeter (y k6)
 
-DESCRIPCION:
-Prueba de carga sobre el endpoint de login de la FakeStore API
-(https://fakestoreapi.com/auth/login), parametrizada con un archivo
-CSV de credenciales. El escenario alcanza al menos 20 TPS con
-validaciones de tiempo de respuesta y tasa de error.
+Este directorio contiene los planes de prueba de rendimiento. Solo el **Ejercicio 1** está documentado en detalle aquí; el resto se describe al final.
 
-----------------------------------------------------------------
-VERSIONES DE TECNOLOGIAS
-----------------------------------------------------------------
-- Apache JMeter: 5.6.3
-- Java: 11 o superior (requerido por JMeter)
-- Sistema Operativo: Windows 10/11
+## Ejercicio 1 — Carga sobre el login de FakeStore API
 
-----------------------------------------------------------------
-ARCHIVOS DEL EJERCICIO
-----------------------------------------------------------------
-- Login_Load_Test.jmx   : Plan de prueba JMeter
-- login_users.csv       : Datos de entrada (usuarios y contrasenas)
-- readme.txt            : Este archivo
-- conclusiones.txt      : Hallazgos y conclusiones
+Carpeta: `Ejercicio1/`. Plan: `Login_Load_Test.jmx`. Datos: `login_users.csv`.
 
-----------------------------------------------------------------
-PRE-REQUISITOS
-----------------------------------------------------------------
-1. Tener instalado Java 11 o superior.
-   Verificar con: java -version
+### Requisitos
+- Java 11 o superior.
+- Apache JMeter 5.6.3 (incluido en `apache-jmeter-5.6.3/`).
+- **Node.js** (solo si el API real no responde y el plan debe usar el mock local).
 
-2. Tener instalado Apache JMeter 5.6.3.
-   Descargar desde: https://jmeter.apache.org/download_jmeter.cgi
-   O usar la instalacion incluida en:
-   ..\apache-jmeter-5.6.3\
+### Escenario
+- Endpoint: `POST https://fakestoreapi.com/auth/login`
+- 30 hilos, ramp-up 30 s, duración 120 s.
+- Constant Throughput Timer a 1200 req/min (20 TPS).
+- Validaciones: respuesta ≤ 1500 ms y código HTTP **200 o 201** (FakeStore responde 201 en login exitoso).
 
-3. Asegurarse de tener conexion a internet para acceder a:
-   https://fakestoreapi.com/auth/login
+### Cómo se elige el entorno
+Antes de la carga, un script JSR223 hace una petición de prueba a `fakestoreapi.com`:
+- Si responde 200 o 201, la prueba apunta a la API real.
+- Si no, arranca `mock-login-server.js` en `localhost:3001` y la prueba apunta al mock. **El resultado de la prueba indica en qué entorno se ejecutó** (`API_ENV` / mensaje del sampler de setup). Revísalo antes de interpretar los resultados.
 
-----------------------------------------------------------------
-INSTRUCCIONES DE EJECUCION
-----------------------------------------------------------------
+### Ejecución
+Ejecutar **desde la carpeta `Ejercicio1`**, porque las rutas del plan son relativas:
 
-OPCION A - Ejecucion desde interfaz grafica (GUI):
---------------------------------------------------
-1. Abrir JMeter:
-   ..\apache-jmeter-5.6.3\bin\jmeter.bat
+```bash
+cd ejercicio-performance/Ejercicio1
+../apache-jmeter-5.6.3/bin/jmeter -n -t Login_Load_Test.jmx -l ../Resultados/resultados_login.csv -e -o ../ReportesHTML/Reporte_Login
+```
 
-2. Ir a File > Open y seleccionar:
-   Login_Load_Test.jmx
+- El reporte HTML queda en `ReportesHTML/Reporte_Login/index.html`. El directorio de salida no debe existir previamente (bórralo si ya existe).
+- En Windows usa `jmeter.bat`.
 
-3. En el nodo "CSV Data Set Config - Usuarios", verificar que
-   el campo "Filename" apunte correctamente a login_users.csv
-   (puede ser ruta relativa o absoluta).
+## Otros ejercicios de este directorio
 
-4. Hacer clic en el boton "Start" (triangulo verde) o
-   presionar Ctrl+R para iniciar la prueba.
-
-5. Revisar resultados en los listeners:
-   - "View Results Tree"   : detalle por peticion
-   - "Summary Report"      : resumen de metricas
-   - "Aggregate Report"    : estadisticas agregadas
-
-OPCION B - Ejecucion por linea de comandos (modo Non-GUI):
-----------------------------------------------------------
-1. Abrir una terminal (CMD o PowerShell).
-
-2. Navegar al directorio del ejercicio:
-   cd D:\Prueba_Tecnica_Jesus_Ramirez\ejercicio-performance\Ejercicio1
-
-3. Ejecutar el siguiente comando:
-
-   ..\apache-jmeter-5.6.3\bin\jmeter.bat ^
-     -n ^
-     -t Login_Load_Test.jmx ^
-     -l ..\Resultados\resultados_login.csv ^
-     -e ^
-     -o ..\ReportesHTML\Reporte_Login
-
-   Parametros:
-     -n           : modo non-GUI
-     -t           : archivo .jmx de entrada
-     -l           : archivo CSV donde se guardan los resultados
-     -e           : generar reporte HTML al finalizar
-     -o           : directorio de salida del reporte HTML
-                    (debe estar vacio o no existir)
-
-4. Una vez finalizada la prueba, abrir el reporte HTML:
-   ..\ReportesHTML\Reporte_Login\index.html
-
-----------------------------------------------------------------
-ESCENARIO DE LA PRUEBA
-----------------------------------------------------------------
-- Endpoint    : POST https://fakestoreapi.com/auth/login
-- Usuarios    : 30 hilos (threads) concurrentes
-- Ramp-up     : 30 segundos
-- Duracion    : 120 segundos
-- TPS objetivo: 20 TPS (controlado con Constant Throughput Timer
-                configurado en 1200 req/min)
-- Datos CSV   : login_users.csv (5 usuarios, reciclados en loop)
-
-Validaciones configuradas:
-  1. Tiempo de respuesta maximo: 1500 ms (DurationAssertion)
-  2. Codigo de respuesta HTTP: 200 (ResponseAssertion)
-  3. Tasa de error aceptable:  < 3% (monitoreada en reportes)
-
-----------------------------------------------------------------
-NOTAS ADICIONALES
-----------------------------------------------------------------
-- El archivo login_users.csv contiene credenciales validas para
-  la FakeStore API en modo demo. El API acepta cualquier usuario
-  registrado y retorna un token JWT.
-
-- Si al ejecutar en modo Non-GUI el directorio de reporte ya
-  existe, eliminarlo primero:
-  rmdir /s /q ..\ReportesHTML\Reporte_Login
-
-- Para modificar la duracion o cantidad de hilos, editar el
-  archivo .jmx con JMeter GUI o con un editor de texto XML.
-================================================================
+- `Pruebas/`: 22 planes `.jmx` de práctica (correlaciones, cookies, uploads, JSON extractor, etc.). Sin documentación individual.
+- `Ejercicio2/`: resumen de ejecución de **k6** (`textSummary.txt`) e informe (`InformeResultados.docx`). El script de k6 no está en el repositorio.
+- `JsonServer/`: notas para levantar un json-server local de práctica.
+- `Data_csv/`: datos de ejemplo para los planes de `Pruebas/`.
+- `Conector/` y `apache-jmeter-5.6.3/`: binarios vendidos (driver MySQL y JMeter).

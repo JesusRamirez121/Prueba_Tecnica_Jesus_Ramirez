@@ -41,3 +41,5 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+### Serenity / Maven-style output ###
+target/

@@ -8,7 +8,7 @@ import net.serenitybdd.screenplay.actions.Click;
 import net.serenitybdd.screenplay.matchers.WebElementStateMatchers;
 import net.serenitybdd.screenplay.waits.WaitUntil;
 
-public class SeleccionarPagoYAceptarTerminosTask  implements Task {
+public class SeleccionarPagoYAceptarTerminosTask implements Task {
 
     @Override
     public <T extends Actor> void performAs(T actor) {
@@ -17,13 +17,11 @@ public class SeleccionarPagoYAceptarTerminosTask  implements Task {
                                 WebElementStateMatchers.isVisible())
                         .forNoMoreThan(10).seconds()
         );
-        try {
-            var checkbox = PaginaCheckoutUI.CHECKBOX_TERMINOS.resolveFor(actor);
-            if (checkbox.isDisplayed() && !checkbox.isSelected()) {
-                checkbox.click();
-            }
-        } catch (Exception ignorado) {
-            // El checkbox puede no estar visible en todos los entornos
+
+        // Los términos solo se marcan si el checkbox está presente y visible en esta versión de la tienda.
+        var checkboxes = PaginaCheckoutUI.CHECKBOX_TERMINOS.resolveAllFor(actor);
+        if (!checkboxes.isEmpty() && checkboxes.get(0).isDisplayed() && !checkboxes.get(0).isSelected()) {
+            checkboxes.get(0).click();
         }
 
         actor.attemptsTo(
